@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>浮点数格式解析</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .input-section, .output-section {
+            width: 45%;
+        }
+        
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            resize: none;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        
+        .output-box {
+            width: 100%;
+            min-height: 100px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+            background-color: #f9f9f9;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .error {
+            color: #f44336;
+            border-color: #f44336;
+        }
+        
+        .info {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .separator {
+            width: 2px;
+            background-color: #eee;
+            margin: 0 30px;
+        }
+    </style>
+</head>
+<body>
+    <h1>浮点数格式解析器</h1>
+    
+    <div class="container">
+        <div class="input-section">
+            <h2>十六进制输入 (Hex)</h2>
+            <textarea id="hexInput" placeholder="请输入4字节的十六进制数，例如：&#10;00 80 8C 43&#10;或&#10;438C8000"></textarea>
+            <div class="info">
+                <p>• 支持空格分隔格式：00 80 8C 43</p>
+                <p>• 支持连续格式：438C8000</p>
+                <p>• 必须是8位十六进制字符（4字节）</p>
+            </div>
+        </div>
+        
+        <div class="separator"></div>
+        
+        <div class="output-section">
+            <h2>浮点数输出 (Float32)</h2>
+            <div id="floatOutput" class="output-box">0.0</div>
+            <div class="info">
+                <p>解析结果：IEEE 754 单精度浮点数</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function hexToFloat(hexStr) {
+            hexStr = hexStr.replace(/\s/g, '');
+            
+            if (hexStr.length !== 8) {
+                throw new Error('输入必须是8位十六进制字符');
+            }
+            
+            if (!/^[0-9a-fA-F]{8}$/.test(hexStr)) {
+                throw new Error('无效的十六进制字符');
+            }
+            
+            const buffer = new ArrayBuffer(4);
+            const view = new DataView(buffer);
+            
+            for (let i = 0; i < 4; i++) {
+                const byteValue = parseInt(hexStr.substr(i * 2, 2), 16);
+                view.setUint8(i, byteValue);
+            }
+            
+            return view.getFloat32(0, true);
+        }
+        
+        function updateOutput() {
+            const input = document.getElementById('hexInput').value;
+            const output = document.getElementById('floatOutput');
+            
+            try {
+                const result = hexToFloat(input);
+                output.textContent = result.toString();
+                output.classList.remove('error');
+            } catch (e) {
+                output.textContent = e.message;
+                output.classList.add('error');
+            }
+        }
+        
+        document.getElementById('hexInput').addEventListener('input', updateOutput);
+        
+        updateOutput();
+    </script>
+</body>
+</html>
