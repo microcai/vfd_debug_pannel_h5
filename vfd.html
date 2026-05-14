@@ -4,185 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>变频器控制面板</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            font-size: 14px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        .btn:hover {
-            background-color: #45a049;
-        }
-
-        .btn:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-
-        .btn-read {
-            background-color: #2196F3;
-        }
-
-        .btn-read:hover {
-            background-color: #1976D2;
-        }
-
-        .btn-write {
-            background-color: #FF9800;
-        }
-
-        .btn-write:hover {
-            background-color: #F57C00;
-        }
-
-        .status {
-            padding: 10px;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-
-        .status-connected {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        .status-disconnected {
-            background-color: #f44336;
-            color: white;
-        }
-
-        .display-section {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .display-card {
-            flex: 1;
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-
-        .display-label {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 10px;
-        }
-
-        .display-value {
-            font-size: 28px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .display-unit {
-            font-size: 14px;
-            color: #999;
-        }
-
-        .input-section {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-
-        .input-row {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .input-group {
-            flex: 1;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 14px;
-            color: #333;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: #4CAF50;
-        }
-
-        .button-row {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-        }
-
-        .log-section {
-            background-color: #1a1a1a;
-            padding: 15px;
-            border-radius: 10px;
-            color: #00ff00;
-            font-family: monospace;
-            font-size: 12px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .log-section h3 {
-            color: #fff;
-            margin-top: 0;
-            font-size: 14px;
-            border-bottom: 1px solid #333;
-            padding-bottom: 10px;
-        }
-
-        .log-sent {
-            color: #FFD700;
-        }
-
-        .log-received {
-            color: #00ff00;
-        }
-
-        .log-info {
-            color: #888;
-        }
-
-        .log-error {
-            color: #ff0000;
-        }
-    </style>
+    <link rel="stylesheet" href="vfd.css"> </link>
 </head>
 <body>
     <h1>变频器控制面板</h1>
@@ -192,51 +14,173 @@
         <div id="status" class="status status-disconnected">未连接</div>
     </div>
 
-    <div class="display-section">
-        <div class="display-card">
-            <div class="display-label">当前电压</div>
-            <div class="display-value" id="voltage">0.0</div>
-            <div class="display-unit">V</div>
-        </div>
-        <div class="display-card">
-            <div class="display-label">当前电流</div>
-            <div class="display-value" id="current">0.0</div>
-            <div class="display-unit">A</div>
-        </div>
-        <div class="display-card">
-            <div class="display-label">当前频率</div>
-            <div class="display-value" id="frequency">0.0</div>
-            <div class="display-unit">Hz</div>
-        </div>
+    <div class="header">
+        <button class="tablinks active" onclick="openTab(event, 'tab1')">运行面板</button>
+        <button class="tablinks" onclick="openTab(event, 'tab2')">位置PID参数</button>
+        <button class="tablinks" onclick="openTab(event, 'tab3')">速度PID参数</button>
+        <button class="tablinks" onclick="openTab(event, 'tab4')">电机参数</button>
+        <button class="tablinks" onclick="openTab(event, 'tab5')">设备信息</button>
     </div>
 
-    <div class="display-section">
-        <div class="display-card">
-            <div class="display-label">目标转速</div>
-            <div class="display-value" id="targetSpeedDisplay">0.0</div>
-            <div class="display-unit">Hz</div>
-        </div>
-        <div class="display-card">
-            <div class="display-label">目标角度</div>
-            <div class="display-value" id="targetAngleDisplay">0.0</div>
-            <div class="display-unit">°</div>
-        </div>
-    </div>
+    <div class="tabs">
+        <div class="tabcontent active" style="display: block;"  id="tab1">
+            <div class="display-section">
+                <div class="display-card">
+                    <div class="display-label">当前电压</div>
+                    <div class="display-value" id="voltage">0.0</div>
+                    <div class="display-unit">V</div>
+                </div>
+                <div class="display-card">
+                    <div class="display-label">当前有功电流</div>
+                    <div class="display-value" id="current">0.0</div>
+                    <div class="display-unit">A</div>
+                </div>
+                <div class="display-card">
+                    <div class="display-label">当前无功电流</div>
+                    <div class="display-value" id="reactiveCurrent">0.0</div>
+                    <div class="display-unit">A</div>
+                </div>
+                <div class="display-card">
+                    <div class="display-label">功率</div>
+                    <div class="display-value" id="power">0.0</div>
+                    <div class="display-unit">W</div>
+                </div>
+            </div>
 
-    <div class="input-section">
-        <div class="input-row">
-            <div class="input-group">
-                <label for="targetSpeed">设置目标转速 (Hz)</label>
-                <input type="number" id="targetSpeed" placeholder="输入目标转速" value="50">
+            <div class="display-section">
+                <div class="display-card">
+                    <div class="display-label">目标转速</div>
+                    <div class="display-value" id="targetSpeedDisplay">0.0</div>
+                    <div class="display-unit">Hz</div>
+                </div>
+                <div class="display-card">
+                    <div class="display-label">目标角度</div>
+                    <div class="display-value" id="targetAngleDisplay">0.0</div>
+                    <div class="display-unit">°</div>
+                </div>
             </div>
-            <div class="input-group">
-                <label for="targetAngle">设置目标角度 (度)</label>
-                <input type="number" id="targetAngle" placeholder="输入目标角度" value="281">
+
+            <div class="input-section">
+                <div class="input-row">
+                    <div class="input-group">
+                        <label for="targetSpeed">设置目标转速 (Hz)</label>
+                        <input type="number" id="targetSpeed" placeholder="输入目标转速" value="50">
+                    </div>
+                    <div class="input-group">
+                        <label for="targetAngle">设置目标角度 (度)</label>
+                        <input type="number" id="targetAngle" placeholder="输入目标角度" value="281">
+                    </div>
+                </div>
+                <div class="button-row">
+                    <button id="readBtn" class="btn btn-read" disabled>读取</button>
+                    <button id="writeBtn" class="btn btn-write" disabled>写入</button>
+                </div>
+            </div>
+            <div class="display-section">
+                <div class="display-card">
+                    <div class="display-label">当前转速</div>
+                    <div class="display-value" id="currentSpeed">0.0</div>
+                    <div class="display-unit">Hz</div>
+                </div>
+            </div>
+
+        </div>
+        <div class="tabcontent" id="tab2">
+            <div class="input-section">
+                <div class="input-row">
+                    <div class="input-group">
+                        <label for="posKp">位置环 Kp</label>
+                        <input type="number" step="0.01" id="posKp" value="0.0">
+                    </div>
+                    <div class="input-group">
+                        <label for="posKi">位置环 Ki</label>
+                        <input type="number" step="0.01" id="posKi" value="0.0">
+                    </div>
+                    <div class="input-group">
+                        <label for="posKd">位置环 Kd</label>
+                        <input type="number" step="0.01" id="posKd" value="0.0">
+                    </div>
+                    <div class="input-group">
+                        <label for="posOutputLimit">位置环输出限制</label>
+                        <input type="number" step="0.01" id="posOutputLimit" value="0.0">
+                    </div>
+                </div>
+                <div class="button-row">
+                    <button id="posPidReadBtn" class="btn btn-read" disabled>读取</button>
+                    <button id="posPidWriteBtn" class="btn btn-write" disabled>写入</button>
+                </div>
             </div>
         </div>
-        <div class="button-row">
-            <button id="readBtn" class="btn btn-read" disabled>读取</button>
-            <button id="writeBtn" class="btn btn-write" disabled>写入</button>
+
+        <div class="tabcontent" id="tab3">
+            <div class="input-section">
+                <div class="input-row">
+                    <div class="input-group">
+                        <label for="speedKp">速度环 Kp</label>
+                        <input type="number" step="0.01" id="speedKp" value="0.0">
+                    </div>
+                    <div class="input-group">
+                        <label for="speedKi">速度环 Ki</label>
+                        <input type="number" step="0.01" id="speedKi" value="0.0">
+                    </div>
+                    <div class="input-group">
+                        <label for="speedKd">速度环 Kd</label>
+                        <input type="number" step="0.01" id="speedKd" value="0.0">
+                    </div>
+                    <div class="input-group">
+                        <label for="speedOutputLimit">速度环输出限制</label>
+                        <input type="number" step="0.01" id="speedOutputLimit" value="0.0">
+                    </div>
+                </div>
+                <div class="button-row">
+                    <button id="speedPidReadBtn" class="btn btn-read" disabled>读取</button>
+                    <button id="speedPidWriteBtn" class="btn btn-write" disabled>写入</button>
+                </div>
+            </div>
+        </div>
+        <div class="tabcontent" id="tab4">
+            <div class="display-section">
+
+                <div class="display-card">
+                    <div class="display-label">定子电阻</div>
+                    <div class="display-value" id="statorResistance">0.0</div>
+                    <div class="display-unit">Ω</div>
+                </div>
+                <div class="display-card">
+                    <div class="display-label">转子电阻</div>
+                    <div class="display-value" id="rotorResistance">0.0</div>
+                    <div class="display-unit">Ω</div>
+                </div>
+                <div class="display-card">
+                    <div class="display-label">定子漏感</div>
+                    <div class="display-value" id="statorInductance" regAddr="0x6C">0.0</div>
+                    <div class="display-unit">H</div>
+                </div>
+                <div class="display-card">
+                    <div class="display-label">转子漏感</div>
+                    <div class="display-value" id="rotorInductance" regAddr="0x6E">0.0</div>
+                    <div class="display-unit">H</div>
+                </div>
+                <div class="display-card">
+                    <div class="display-label">互感</div>
+                    <div class="display-value" id="mutualInductance">0.0</div>
+                    <div class="display-unit">H</div>
+                </div>
+                <div class="display-card">
+                    <div class="display-label">极对数</div>
+                    <div class="display-value" id="polePairs" regAddr="0x7C">0.0</div>
+                    <div class="display-unit"></div>
+                </div>
+            </div>
+        </div>
+        <div class="tabcontent" id="tab5">
+            <div class="display-section">
+                <div class="display-card">
+                    <div class="display-label">齿轮比</div>
+                    <div class="display-value" id="gearRatio" regAddr="0x88">0.0</div>
+                    <div class="display-unit">1</div>
+                </div>
+            </div>
         </div>
     </div>
 

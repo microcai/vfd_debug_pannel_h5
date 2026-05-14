@@ -4,9 +4,72 @@ class VFDController {
         this.baudRate = this.getStoredBaudRate() || 115200;
         this.deviceAddress = 0x62;
 
+        this.registers = this.createRegisterMap();
+
         this.initUI();
         this.initEventListeners();
         this.checkBrowserSupport();
+    }
+
+    createRegisterMap() {
+        return {
+            0x00: { name: 'runStatus', size: 2, type: 'uint16', value: 0 },
+            0x02: { name: 'opMode', size: 1, type: 'uint8', value: 0 },
+            0x03: { name: 'directControlCommand', size: 1, type: 'uint8', value: 0 },
+            0x04: { name: 'vbus', size: 4, type: 'float32', value: 0 },
+            0x08: { name: 'outputPower', size: 4, type: 'float32', value: 0 },
+            0x0C: { name: 'iq', size: 4, type: 'float32', value: 0 },
+            0x10: { name: 'id', size: 4, type: 'float32', value: 0 },
+            0x14: { name: 'curFreq', size: 4, type: 'float32', value: 0 },
+            0x18: { name: 'curTorque', size: 4, type: 'float32', value: 0 },
+            0x1C: { name: 'curSpeed', size: 4, type: 'float32', value: 0 },
+            0x20: { name: 'curPosition', size: 4, type: 'float32', value: 0 },
+            0x24: { name: 'targetFreq', size: 4, type: 'float32', value: 0 },
+            0x28: { name: 'targetTorque', size: 4, type: 'float32', value: 0 },
+            0x2C: { name: 'targetSpeed', size: 4, type: 'float32', value: 0 },
+            0x30: { name: 'targetPosition', size: 4, type: 'float32', value: 0 },
+            0x40: { name: 'fwMajor', size: 1, type: 'uint8', value: 0 },
+            0x41: { name: 'fwMinor', size: 1, type: 'uint8', value: 0 },
+            0x42: { name: 'protocolVersion', size: 1, type: 'uint8', value: 0 },
+            0x43: { name: 'extendDeviceType', size: 1, type: 'uint8', value: 0 },
+            0x60: { name: 'statorR', size: 2, type: 'float16', value: 0 },
+            0x62: { name: 'rotorR', size: 2, type: 'float16', value: 0 },
+            0x64: { name: 'statorL', size: 2, type: 'float16', value: 0 },
+            0x66: { name: 'rotorL', size: 2, type: 'float16', value: 0 },
+            0x68: { name: 'mutualL', size: 2, type: 'float16', value: 0 },
+            0x6A: { name: 'ratedPower', size: 2, type: 'float16', value: 0 },
+            0x6C: { name: 'ratedSlip', size: 2, type: 'float16', value: 0 },
+            0x6E: { name: 'ratedCurrent', size: 2, type: 'float16', value: 0 },
+            0x70: { name: 'ratedFreq', size: 2, type: 'float16', value: 0 },
+            0x72: { name: 'ratedVoltage', size: 2, type: 'float16', value: 0 },
+            0x74: { name: 'polarCount', size: 1, type: 'uint8', value: 0 },
+            0x75: { name: 'minFreq', size: 1, type: 'uint8', value: 0 },
+            0x76: { name: 'vfGainFreq', size: 1, type: 'uint8', value: 0 },
+            0x77: { name: 'motorType', size: 1, type: 'uint8', value: 0 },
+            0x78: { name: 'gearRatio', size: 2, type: 'float16', value: 0 },
+            0x7A: { name: 'upperLimit', size: 2, type: 'float16', value: 0 },
+            0x7C: { name: 'lowerLimit', size: 2, type: 'float16', value: 0 },
+            0x7E: { name: 'posKp', size: 2, type: 'float16', value: 0 },
+            0x80: { name: 'posKi', size: 2, type: 'float16', value: 0 },
+            0x82: { name: 'posKd', size: 2, type: 'float16', value: 0 },
+            0x84: { name: 'posOutputLimit', size: 2, type: 'float16', value: 0 },
+            0x86: { name: 'speedKp', size: 2, type: 'float16', value: 0 },
+            0x88: { name: 'speedKi', size: 2, type: 'float16', value: 0 },
+            0x8A: { name: 'speedKd', size: 2, type: 'float16', value: 0 },
+            0x8C: { name: 'speedOutputLimit', size: 2, type: 'float16', value: 0 },
+            0x8E: { name: 'speedupSec', size: 2, type: 'uint16', value: 0 },
+            0x90: { name: 'speeddownSec', size: 2, type: 'uint16', value: 0 },
+            0x92: { name: 'relayOpenHz', size: 2, type: 'uint16', value: 0 },
+            0x94: { name: 'relayCloseHz', size: 2, type: 'uint16', value: 0 },
+            0x96: { name: 'fanStartTemp', size: 1, type: 'uint8', value: 0 },
+            0x97: { name: 'fanStopTemp', size: 1, type: 'uint8', value: 0 },
+            0x98: { name: 'motorIdx', size: 1, type: 'uint8', value: 0 },
+            0x99: { name: 'runningHz', size: 1, type: 'uint8', value: 0 },
+            0x9A: { name: 'dcProtectVoltage', size: 2, type: 'uint16', value: 0 },
+            0x9C: { name: 'currentLimit', size: 2, type: 'uint16', value: 0 },
+            0x9E: { name: 'userSettingsFlag', size: 2, type: 'uint16', value: 0 },
+            0xA0: { name: 'overTempProtectTemp', size: 1, type: 'uint8', value: 0 },
+        };
     }
 
     getStoredBaudRate() {
@@ -49,18 +112,41 @@ class VFDController {
 
         this.voltageDisplay = document.getElementById('voltage');
         this.currentDisplay = document.getElementById('current');
+        this.reactiveCurrentDisplay = document.getElementById('reactiveCurrent');
+        this.powerDisplay = document.getElementById('power');
+
         this.frequencyDisplay = document.getElementById('frequency');
         this.targetSpeedDisplay = document.getElementById('targetSpeedDisplay');
         this.targetAngleDisplay = document.getElementById('targetAngleDisplay');
 
         this.targetSpeedInput = document.getElementById('targetSpeed');
         this.targetAngleInput = document.getElementById('targetAngle');
+
+        this.posKpInput = document.getElementById('posKp');
+        this.posKiInput = document.getElementById('posKi');
+        this.posKdInput = document.getElementById('posKd');
+        this.posOutputLimitInput = document.getElementById('posOutputLimit');
+
+        this.speedKpInput = document.getElementById('speedKp');
+        this.speedKiInput = document.getElementById('speedKi');
+        this.speedKdInput = document.getElementById('speedKd');
+        this.speedOutputLimitInput = document.getElementById('speedOutputLimit');
+
+        this.posPidReadBtn = document.getElementById('posPidReadBtn');
+        this.posPidWriteBtn = document.getElementById('posPidWriteBtn');
+        this.speedPidReadBtn = document.getElementById('speedPidReadBtn');
+        this.speedPidWriteBtn = document.getElementById('speedPidWriteBtn');
     }
 
     initEventListeners() {
         this.connectBtn.addEventListener('click', () => this.connectSerial());
         this.readBtn.addEventListener('click', () => this.readRegisters());
         this.writeBtn.addEventListener('click', () => this.writeRegisters());
+
+        this.posPidReadBtn.addEventListener('click', () => this.readPosPidRegisters());
+        this.posPidWriteBtn.addEventListener('click', () => this.writePosPidRegisters());
+        this.speedPidReadBtn.addEventListener('click', () => this.readSpeedPidRegisters());
+        this.speedPidWriteBtn.addEventListener('click', () => this.writeSpeedPidRegisters());
     }
 
     async connectSerial() {
@@ -97,6 +183,10 @@ class VFDController {
                 this.connectBtn.textContent = '关闭串口';
                 this.readBtn.disabled = false;
                 this.writeBtn.disabled = false;
+                this.posPidReadBtn.disabled = false;
+                this.posPidWriteBtn.disabled = false;
+                this.speedPidReadBtn.disabled = false;
+                this.speedPidWriteBtn.disabled = false;
 
                 this.log(`串口已打开，波特率: ${this.baudRate}`, 'info');
             } else {
@@ -182,6 +272,10 @@ class VFDController {
                 this.connectBtn.textContent = '打开串口';
                 this.readBtn.disabled = true;
                 this.writeBtn.disabled = true;
+                this.posPidReadBtn.disabled = true;
+                this.posPidWriteBtn.disabled = true;
+                this.speedPidReadBtn.disabled = true;
+                this.speedPidWriteBtn.disabled = true;
 
                 this.log('串口已关闭', 'info');
             } catch (error) {
@@ -247,24 +341,34 @@ class VFDController {
         try {
             this.log('开始读取寄存器...', 'info');
 
-            this.log('读取 float16 寄存器 (0x12-0x1A)...', 'info');
-            const float16Data = await this.sendCommandAndWaitResponse(this.buildReadCommand(0x12, 10));
-            if (float16Data) {
-                const data = this.parseReadResponse(float16Data);
-                if (data) {
-                    this.parseFloat16Registers(data);
-                }
-            }
-
-            this.log('读取目标速度和角度 (0x28-0x2C)...', 'info');
-            const float32Data = await this.sendCommandAndWaitResponse(this.buildReadCommand(0x28, 8));
+            this.log('读取运行时数据 (0x4-0x13)...', 'info');
+            let float32Data = await this.sendCommandAndWaitResponse(this.buildReadCommand(0x4, 0x10));
             if (float32Data) {
                 const data = this.parseReadResponse(float32Data);
                 if (data) {
-                    this.parseTargetRegisters(data);
+                    this.updateRegistersFromResponse(0x4, data);
                 }
             }
 
+            this.log('读取当前位置信息 (0x14-0x23)...', 'info');
+            float32Data = await this.sendCommandAndWaitResponse(this.buildReadCommand(0x14, 0x10));
+            if (float32Data) {
+                const data = this.parseReadResponse(float32Data);
+                if (data) {
+                    this.updateRegistersFromResponse(0x14, data);
+                }
+            }
+
+            this.log('读取目标速度和位置 (0x2C-0x33)...', 'info');
+            float32Data = await this.sendCommandAndWaitResponse(this.buildReadCommand(0x2C, 0x08));
+            if (float32Data) {
+                const data = this.parseReadResponse(float32Data);
+                if (data) {
+                    this.updateRegistersFromResponse(0x2C, data);
+                }
+            }
+
+            this.updateDisplays();
             this.log('读取完成', 'info');
         } catch (error) {
             this.log(`读取失败: ${error.message}`, 'error');
@@ -277,7 +381,7 @@ class VFDController {
             const angle = parseFloat(this.targetAngleInput.value) || 281;
 
             const data = this.floatToBytes(speed, true).concat(this.floatToBytes(angle, true));
-            const cmd = this.buildWriteCommand(0x28, data);
+            const cmd = this.buildWriteCommand(0x24, data);
 
             this.log(`写入目标: 速度=${speed}Hz, 角度=${angle}°`, 'info');
             const response = await this.sendCommandAndWaitResponse(cmd);
@@ -297,6 +401,116 @@ class VFDController {
         } catch (error) {
             this.log(`写入失败: ${error.message}`, 'error');
         }
+    }
+
+    async readPosPidRegisters() {
+        try {
+            this.log('读取位置PID参数 (0x7E-0x85)...', 'info');
+            const data = await this.sendCommandAndWaitResponse(this.buildReadCommand(0x7E, 0x08));
+            if (data) {
+                const responseData = this.parseReadResponse(data);
+                if (responseData) {
+                    this.updateRegistersFromResponse(0x7E, responseData);
+                    this.updatePosPidDisplays();
+                    this.log('位置PID参数读取完成', 'info');
+                }
+            }
+        } catch (error) {
+            this.log(`读取位置PID失败: ${error.message}`, 'error');
+        }
+    }
+
+    async writePosPidRegisters() {
+        try {
+            const kp = parseFloat(this.posKpInput.value) || 0;
+            const ki = parseFloat(this.posKiInput.value) || 0;
+            const kd = parseFloat(this.posKdInput.value) || 0;
+            const outputLimit = parseFloat(this.posOutputLimitInput.value) || 0;
+
+            const data = this.floatToFloat16(kp)
+                .concat(this.floatToFloat16(ki))
+                .concat(this.floatToFloat16(kd))
+                .concat(this.floatToFloat16(outputLimit));
+
+            const cmd = this.buildWriteCommand(0x7E, data);
+            this.log(`写入位置PID: Kp=${kp}, Ki=${ki}, Kd=${kd}, Limit=${outputLimit}`, 'info');
+
+            const response = await this.sendCommandAndWaitResponse(cmd);
+            if (response && response.length === 2) {
+                const length = response[0];
+                const crc = response[1];
+                const calculatedCrc = this.crc8(new Uint8Array([length]));
+                if (calculatedCrc === crc) {
+                    this.log('位置PID写入成功', 'info');
+                } else {
+                    this.log('CRC校验失败', 'error');
+                }
+            }
+        } catch (error) {
+            this.log(`写入位置PID失败: ${error.message}`, 'error');
+        }
+    }
+
+    updatePosPidDisplays() {
+        if (this.posKpInput) this.posKpInput.value = this.registers[0x7E].value.toFixed(4);
+        if (this.posKiInput) this.posKiInput.value = this.registers[0x80].value.toFixed(4);
+        if (this.posKdInput) this.posKdInput.value = this.registers[0x82].value.toFixed(4);
+        if (this.posOutputLimitInput) this.posOutputLimitInput.value = this.registers[0x84].value.toFixed(4);
+    }
+
+    async readSpeedPidRegisters() {
+        try {
+            this.log('读取速度PID参数 (0x86-0x8D)...', 'info');
+            const data = await this.sendCommandAndWaitResponse(this.buildReadCommand(0x86, 0x08));
+            if (data) {
+                const responseData = this.parseReadResponse(data);
+                if (responseData) {
+                    this.updateRegistersFromResponse(0x86, responseData);
+                    this.updateSpeedPidDisplays();
+                    this.log('速度PID参数读取完成', 'info');
+                }
+            }
+        } catch (error) {
+            this.log(`读取速度PID失败: ${error.message}`, 'error');
+        }
+    }
+
+    async writeSpeedPidRegisters() {
+        try {
+            const kp = parseFloat(this.speedKpInput.value) || 0;
+            const ki = parseFloat(this.speedKiInput.value) || 0;
+            const kd = parseFloat(this.speedKdInput.value) || 0;
+            const outputLimit = parseFloat(this.speedOutputLimitInput.value) || 0;
+
+            const data = this.floatToFloat16(kp)
+                .concat(this.floatToFloat16(ki))
+                .concat(this.floatToFloat16(kd))
+                .concat(this.floatToFloat16(outputLimit));
+
+            const cmd = this.buildWriteCommand(0x86, data);
+            this.log(`写入速度PID: Kp=${kp}, Ki=${ki}, Kd=${kd}, Limit=${outputLimit}`, 'info');
+
+            const response = await this.sendCommandAndWaitResponse(cmd);
+            if (response && response.length === 2) {
+                const length = response[0];
+                const crc = response[1];
+                const calculatedCrc = this.crc8(new Uint8Array([length]));
+                if (calculatedCrc === crc) {
+                    this.log('速度PID写入成功', 'info');
+                } else {
+                    this.log('CRC校验失败', 'error');
+                }
+            }
+        } catch (error) {
+            this.log(`写入速度PID失败: ${error.message}`, 'error');
+        }
+    }
+
+    updateSpeedPidDisplays() {
+        if (this.speedKpInput) this.speedKpInput.value = this.registers[0x86].value.toFixed(4);
+        if (this.speedKiInput) this.speedKiInput.value = this.registers[0x88].value.toFixed(4);
+        if (this.speedKdInput) this.speedKdInput.value = this.registers[0x8A].value.toFixed(4);
+        if (this.speedOutputLimitInput) this.speedOutputLimitInput.value = this.registers[0x8C].value.toFixed(4);
     }
 
     parseReadResponse(rxBuffer) {
@@ -361,44 +575,76 @@ class VFDController {
         return result;
     }
 
-    parseFloat16Registers(data) {
-        const registers = [
-            { offset: 0, display: this.voltageDisplay },
-            { offset: 2, display: this.currentDisplay },
-            { offset: 4, display: null },
-            { offset: 6, display: null },
-            { offset: 8, display: null }
-        ];
+    updateRegistersFromResponse(startAddr, data) {
+        let offset = 0;
+        let currentAddr = startAddr;
 
-        registers.forEach((reg, index) => {
-            if (reg.display && reg.offset + 2 <= data.length) {
-                const bytes = new Uint8Array(2);
-                bytes[0] = data[reg.offset];
-                bytes[1] = data[reg.offset + 1];
-                const value = this.float16ToFloat(bytes);
-                reg.display.textContent = value.toFixed(2);
+        while (offset < data.length && this.registers[currentAddr]) {
+            const reg = this.registers[currentAddr];
+
+            if (offset + reg.size > data.length) {
+                break;
             }
-        });
+
+            const bytes = new Uint8Array(reg.size);
+            for (let i = 0; i < reg.size; i++) {
+                bytes[i] = data[offset + i];
+            }
+
+            switch (reg.type) {
+                case 'float32':
+                    reg.value = this.bytesToFloat(bytes, true);
+                    break;
+                case 'float16':
+                    reg.value = this.float16ToFloat(bytes);
+                    break;
+                case 'uint16':
+                    reg.value = (bytes[1] << 8) | bytes[0];
+                    break;
+                case 'uint8':
+                    reg.value = bytes[0];
+                    break;
+                default:
+                    reg.value = this.bytesToFloat(bytes, true);
+            }
+
+            offset += reg.size;
+            currentAddr += reg.size;
+        }
+
+        this.log(`寄存器更新: 地址 0x${startAddr.toString(16)}, ${data.length} 字节`, 'info');
     }
 
-    parseTargetRegisters(data) {
-        if (data.length >= 4) {
-            const speedBytes = new Uint8Array(4);
-            for (let i = 0; i < 4; i++) {
-                speedBytes[i] = data[i];
-            }
-            const speed = this.bytesToFloat(speedBytes, true);
-            this.targetSpeedDisplay.textContent = speed.toFixed(2);
+    updateDisplays() {
+        if (this.voltageDisplay) {
+            this.voltageDisplay.textContent = this.registers[0x04].value.toFixed(2);
         }
+        if (this.powerDisplay) {
+            this.powerDisplay.textContent = this.registers[0x08].value.toFixed(2);
+        }
+        if (this.currentDisplay) {
+            this.currentDisplay.textContent = this.registers[0x0C].value.toFixed(2);
+        }
+        if (this.reactiveCurrentDisplay) {
+            this.reactiveCurrentDisplay.textContent = this.registers[0x10].value.toFixed(2);
+        }
+        if (this.frequencyDisplay) {
+            this.frequencyDisplay.textContent = this.registers[0x14].value.toFixed(2);
+        }
+        if (this.targetSpeedDisplay) {
+            this.targetSpeedDisplay.textContent = this.registers[0x2C].value.toFixed(2);
+        }
+        if (this.targetAngleDisplay) {
+            this.targetAngleDisplay.textContent = this.registers[0x30].value.toFixed(2);
+        }
+    }
 
-        if (data.length >= 8) {
-            const angleBytes = new Uint8Array(4);
-            for (let i = 0; i < 4; i++) {
-                angleBytes[i] = data[4 + i];
-            }
-            const angle = this.bytesToFloat(angleBytes, true);
-            this.targetAngleDisplay.textContent = angle.toFixed(2);
+    getRegister(addrOrName) {
+        if (typeof addrOrName === 'string') {
+            const addr = parseInt(addrOrName, 16);
+            return this.registers[addr] ? this.registers[addr].value : null;
         }
+        return this.registers[addrOrName] ? this.registers[addrOrName].value : null;
     }
 
     crc8(data) {
@@ -433,25 +679,18 @@ class VFDController {
     }
 
     float16ToFloat(bytes) {
-        const h = (bytes[1] << 8) | bytes[0];
+        const buffer = new ArrayBuffer(2);
+        const view = new DataView(buffer);
+        view.setUint8(0, bytes[0]);
+        view.setUint8(1, bytes[1]);
+        return view.getFloat16(0, true);
+    }
 
-        const sign = ((h >> 15) & 1) << 31;
-        let exp = ((h >> 10) & 0x1F);
-        let mantissa = (h & 0x3FF) << 13;
-
-        if (exp === 0) {
-            if (mantissa === 0) {
-                return new Float32Array(new Uint32Array([sign]).buffer)[0];
-            }
-            exp = 1;
-        } else if (exp === 31) {
-            exp = 255;
-        } else {
-            exp = exp - 15 + 127;
-        }
-
-        const bits = sign | (exp << 23) | mantissa;
-        return new Float32Array(new Uint32Array([bits]).buffer)[0];
+    floatToFloat16(value) {
+        const buffer = new ArrayBuffer(2);
+        const view = new DataView(buffer);
+        view.setFloat16(0, value, true);
+        return new Uint8Array(buffer);
     }
 
     bytesToHex(bytes) {
@@ -470,3 +709,23 @@ class VFDController {
 document.addEventListener('DOMContentLoaded', () => {
     window.vfd = new VFDController();
 });
+
+function openTab(evt, tabName) {
+  var i, tabcontent, tablinks;
+
+  // 获取所有选项卡内容元素，隐藏它们
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+
+  // 获取所有选项卡链接元素，移除它们的 active 类
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+
+  // 显示当前选项卡的内容，并将链接标记为 active
+  document.getElementById(tabName).style.display = "block";
+  evt.currentTarget.className += " active";
+}
