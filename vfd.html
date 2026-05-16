@@ -174,11 +174,24 @@
             </div>
         </div>
         <div class="tabcontent" id="tab5">
-            <div class="display-section">
-                <div class="display-card">
-                    <div class="display-label">齿轮比</div>
-                    <div class="display-value" id="gearRatio" regAddr="0x88">0.0</div>
-                    <div class="display-unit">1</div>
+            <div class="input-section">
+                <div class="input-row">
+                    <div class="input-group">
+                        <label for="gearRatio">齿轮比 GearRatio</label>
+                        <input type="number" step="0.01" id="gearRatio" value="0.0">
+                    </div>
+                    <div class="input-group">
+                        <label for="upperLimit">上止点角度</label>
+                        <input type="number" step="0.01" id="upperLimit" value="0.0">
+                    </div>
+                    <div class="input-group">
+                        <label for="lowerLimit">下止点角度</label>
+                        <input type="number" step="0.01" id="lowerLimit" value="0.0">
+                    </div>
+                </div>
+                <div class="button-row">
+                    <button id="gearReadBtn" class="btn btn-read" disabled>读取</button>
+                    <button id="gearWriteBtn" class="btn btn-write" disabled>写入</button>
                 </div>
             </div>
         </div>

@@ -136,6 +136,12 @@ class VFDController {
         this.posPidWriteBtn = document.getElementById('posPidWriteBtn');
         this.speedPidReadBtn = document.getElementById('speedPidReadBtn');
         this.speedPidWriteBtn = document.getElementById('speedPidWriteBtn');
+
+        this.gearRatioInput = document.getElementById('gearRatio');
+        this.upperLimitInput = document.getElementById('upperLimit');
+        this.lowerLimitInput = document.getElementById('lowerLimit');
+        this.gearReadBtn = document.getElementById('gearReadBtn');
+        this.gearWriteBtn = document.getElementById('gearWriteBtn');
     }
 
     initEventListeners() {
@@ -147,6 +153,9 @@ class VFDController {
         this.posPidWriteBtn.addEventListener('click', () => this.writePosPidRegisters());
         this.speedPidReadBtn.addEventListener('click', () => this.readSpeedPidRegisters());
         this.speedPidWriteBtn.addEventListener('click', () => this.writeSpeedPidRegisters());
+
+        this.gearReadBtn.addEventListener('click', () => this.readGearRegisters());
+        this.gearWriteBtn.addEventListener('click', () => this.writeGearRegisters());
     }
 
     async connectSerial() {
@@ -187,6 +196,8 @@ class VFDController {
                 this.posPidWriteBtn.disabled = false;
                 this.speedPidReadBtn.disabled = false;
                 this.speedPidWriteBtn.disabled = false;
+                this.gearReadBtn.disabled = false;
+                this.gearWriteBtn.disabled = false;
 
                 this.log(`串口已打开，波特率: ${this.baudRate}`, 'info');
             } else {
@@ -276,6 +287,8 @@ class VFDController {
                 this.posPidWriteBtn.disabled = true;
                 this.speedPidReadBtn.disabled = true;
                 this.speedPidWriteBtn.disabled = true;
+                this.gearReadBtn.disabled = true;
+                this.gearWriteBtn.disabled = true;
 
                 this.log('串口已关闭', 'info');
             } catch (error) {
@@ -513,6 +526,58 @@ class VFDController {
         if (this.speedOutputLimitInput) this.speedOutputLimitInput.value = this.registers[0x8C].value.toFixed(4);
     }
 
+    async readGearRegisters() {
+        try {
+            this.log('读取齿轮比和限位参数 (0x78-0x7D)...', 'info');
+            const data = await this.sendCommandAndWaitResponse(this.buildReadCommand(0x78, 0x06));
+            if (data) {
+                const responseData = this.parseReadResponse(data);
+                if (responseData) {
+                    this.updateRegistersFromResponse(0x78, responseData);
+                    this.updateGearDisplays();
+                    this.log('齿轮比和限位参数读取完成', 'info');
+                }
+            }
+        } catch (error) {
+            this.log(`读取齿轮比失败: ${error.message}`, 'error');
+        }
+    }
+
+    async writeGearRegisters() {
+        try {
+            const gearRatio = parseFloat(this.gearRatioInput.value) || 0;
+            const upperLimit = parseFloat(this.upperLimitInput.value) || 0;
+            const lowerLimit = parseFloat(this.lowerLimitInput.value) || 0;
+
+            const data = this.floatToFloat16(gearRatio)
+                .concat(this.floatToFloat16(upperLimit))
+                .concat(this.floatToFloat16(lowerLimit));
+
+            const cmd = this.buildWriteCommand(0x78, data);
+            this.log(`写入齿轮比: GearRatio=${gearRatio}, Upper=${upperLimit}, Lower=${lowerLimit}`, 'info');
+
+            const response = await this.sendCommandAndWaitResponse(cmd);
+            if (response && response.length === 2) {
+                const length = response[0];
+                const crc = response[1];
+                const calculatedCrc = this.crc8(new Uint8Array([length]));
+                if (calculatedCrc === crc) {
+                    this.log('齿轮比写入成功', 'info');
+                } else {
+                    this.log('CRC校验失败', 'error');
+                }
+            }
+        } catch (error) {
+            this.log(`写入齿轮比失败: ${error.message}`, 'error');
+        }
+    }
+
+    updateGearDisplays() {
+        if (this.gearRatioInput) this.gearRatioInput.value = this.registers[0x78].value.toFixed(4);
+        if (this.upperLimitInput) this.upperLimitInput.value = this.registers[0x7A].value.toFixed(4);
+        if (this.lowerLimitInput) this.lowerLimitInput.value = this.registers[0x7C].value.toFixed(4);
+    }
+
     parseReadResponse(rxBuffer) {
         const length = rxBuffer[0];
         const crc = rxBuffer[rxBuffer.length - 1];
@@ -687,10 +752,19 @@ class VFDController {
     }
 
     floatToFloat16(value) {
-        const buffer = new ArrayBuffer(2);
-        const view = new DataView(buffer);
-        view.setFloat16(0, value, true);
-        return new Uint8Array(buffer);
+        const bits = new Uint32Array(new Float32Array([value]).buffer)[0];
+        const sign = (bits >> 16) & 0x8000;
+        let exp = ((bits >> 23) & 0xFF) - 127 + 15;
+        const mantissa = bits & 0x7FFFFF;
+
+        if (exp <= 0) {
+            return [0, 0];
+        } else if (exp >= 31) {
+            exp = 31;
+        }
+
+        const h = sign | ((exp & 0x1F) << 10) | (mantissa >> 13);
+        return [h & 0xFF, (h >> 8) & 0xFF];
     }
 
     bytesToHex(bytes) {
