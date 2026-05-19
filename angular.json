@@ -42,7 +42,8 @@
                   "maximumError": "8kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "baseHref": "/vfd_debug_pannel_h5/"
             },
             "development": {
               "optimization": false,
