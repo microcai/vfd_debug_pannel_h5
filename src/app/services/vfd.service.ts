@@ -414,6 +414,69 @@ export class VfdService {
     }
   }
   
+  async readMotorRegisters(): Promise<void> {
+    try {
+      this.log('读取电机参数 (0x60-0x77)...', 'info');
+      await this.readRegisterBlock(0x60, 0x10);
+      await this.readRegisterBlock(0x70, 0x08);
+      this.updateDataSubject();
+      this.log('电机参数读取完成', 'info');
+    } catch (error: any) {
+      this.log(`读取电机参数失败: ${error.message}`, 'error');
+    }
+  }
+  
+  async writeMotorRegisters(
+    statorR: number, rotorR: number, statorL: number, rotorL: number, mutualL: number,
+    ratedPower: number, ratedSlip: number, ratedCurrent: number, ratedFreq: number,
+    ratedVoltage: number, polarCount: number
+  ): Promise<void> {
+    try {
+      this.log(`写入电机参数: statorR=${statorR}, rotorR=${rotorR}, statorL=${statorL}, rotorL=${rotorL}, mutualL=${mutualL}, ratedPower=${ratedPower}, ratedSlip=${ratedSlip}, ratedCurrent=${ratedCurrent}, ratedFreq=${ratedFreq}, ratedVoltage=${ratedVoltage}, polarCount=${polarCount}`, 'info');
+
+      const data1 = this.floatToFloat16(statorR)
+        .concat(this.floatToFloat16(rotorR))
+        .concat(this.floatToFloat16(statorL))
+        .concat(this.floatToFloat16(rotorL))
+        .concat(this.floatToFloat16(mutualL))
+        .concat(this.floatToFloat16(ratedPower))
+        .concat(this.floatToFloat16(ratedSlip))
+        .concat(this.floatToFloat16(ratedCurrent));
+      const cmd1 = this.buildWriteCommand(0x60, data1);
+      this.log('写入电机参数第1段 (0x60-0x6F, 16字节)', 'info');
+      const response1 = await this.sendCommandAndWaitResponse(cmd1);
+      if (response1 && response1.length === 2) {
+        const calculatedCrc = this.crc8(new Uint8Array([response1[0]]));
+        if (calculatedCrc === response1[1]) {
+          this.log('电机参数第1段写入成功', 'info');
+        } else {
+          this.log('电机参数第1段CRC校验失败', 'error');
+          return;
+        }
+      }
+
+      const data2 = this.floatToFloat16(ratedFreq)
+        .concat(this.floatToFloat16(ratedVoltage))
+        .concat([polarCount & 0xFF]);
+      const cmd2 = this.buildWriteCommand(0x70, data2);
+      this.log('写入电机参数第2段 (0x70-0x74, 5字节)', 'info');
+      const response2 = await this.sendCommandAndWaitResponse(cmd2);
+      if (response2 && response2.length === 2) {
+        const calculatedCrc = this.crc8(new Uint8Array([response2[0]]));
+        if (calculatedCrc === response2[1]) {
+          this.log('电机参数第2段写入成功', 'info');
+        } else {
+          this.log('电机参数第2段CRC校验失败', 'error');
+          return;
+        }
+      }
+
+      this.log('电机参数全部写入完成', 'info');
+    } catch (error: any) {
+      this.log(`写入电机参数失败: ${error.message}`, 'error');
+    }
+  }
+  
   private parseReadResponse(rxBuffer: Uint8Array): Uint8Array | null {
     const length = rxBuffer[0];
     const crc = rxBuffer[rxBuffer.length - 1];
