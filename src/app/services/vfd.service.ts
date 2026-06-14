@@ -9,6 +9,13 @@ interface SerialPortLike {
   close: () => Promise<void>;
 }
 
+// 计算超时时间，单位：毫秒
+// 根据波形来，因为一个包最大32字节，所以超时时间是 30ms + 10000/baudRate ms
+const timeout_by_baud_rate = (baudRate: number) => {
+  return 30 + (10000 / baudRate);
+}
+
+
 @Injectable({
   providedIn: 'root'
 })
@@ -208,7 +215,7 @@ export class VfdService {
       while (Date.now() - startTime < timeoutMs) {
         const readerPromise = reader.read();
         const waitPromise = new Promise<{ done: boolean; timeout?: boolean }>(
-          resolve => setTimeout(() => resolve({ done: true, timeout: true }), timeoutMs)
+          resolve => setTimeout(() => resolve({ done: true, timeout: true }), timeout_by_baud_rate(this.baudRate))
         );
         
         const result = await Promise.race([readerPromise, waitPromise]);
