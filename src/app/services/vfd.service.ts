@@ -208,7 +208,7 @@ export class VfdService {
       while (Date.now() - startTime < timeoutMs) {
         const readerPromise = reader.read();
         const waitPromise = new Promise<{ done: boolean; timeout?: boolean }>(
-          resolve => setTimeout(() => resolve({ done: true, timeout: true }), 30)
+          resolve => setTimeout(() => resolve({ done: true, timeout: true }), timeoutMs)
         );
         
         const result = await Promise.race([readerPromise, waitPromise]);
