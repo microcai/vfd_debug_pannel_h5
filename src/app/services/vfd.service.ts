@@ -197,41 +197,52 @@ export class VfdService {
     }
   }
   
-  private async sendCommandAndWaitResponse(data: Uint8Array, timeoutMs = 500): Promise<Uint8Array | null> {
+  private async sendCommandAndWaitResponse(data: Uint8Array, idleTimeoutMs?: number): Promise<Uint8Array | null> {
     if (!this.port || !this.port.writable) {
       throw new Error('串口未连接');
     }
     
     const writer = this.port.writable.getWriter();
     const reader = this.port.readable.getReader();
+    
+    const MAX_BUFFER_SIZE = 32;
+    const effectiveIdleTimeout = idleTimeoutMs ?? timeout_by_baud_rate(this.baudRate);
     const rxBuffer: number[] = [];
     
     try {
       await writer.write(data);
       this.log(`发送: ${this.bytesToHex(data)}`, 'sent');
       
-      const startTime = Date.now();
-      
-      while (Date.now() - startTime < timeoutMs) {
+      while (true) {
         const readerPromise = reader.read();
-        const waitPromise = new Promise<{ done: boolean; timeout?: boolean }>(
-          resolve => setTimeout(() => resolve({ done: true, timeout: true }), timeout_by_baud_rate(this.baudRate))
+        const idlePromise = new Promise<null>(
+          resolve => setTimeout(() => resolve(null), effectiveIdleTimeout)
         );
         
-        const result = await Promise.race([readerPromise, waitPromise]);
+        const result = await Promise.race([readerPromise, idlePromise]);
         
-        if ('timeout' in result && result.timeout) {
-          if (rxBuffer.length > 0) break;
-          continue;
+        if (result === null) {
+          break;
         }
         
-        if ('done' in result && result.done && !('timeout' in result)) {
+        if ('done' in result && result.done) {
           break;
         }
         
         if ('value' in result && result.value && (result.value as Uint8Array).length > 0) {
-          this.log(`收到: ${this.bytesToHex(result.value as Uint8Array)}`, 'received');
-          rxBuffer.push(...Array.from(result.value as Uint8Array));
+          const chunk = result.value as Uint8Array;
+          this.log(`收到: ${this.bytesToHex(chunk)}`, 'received');
+          const remaining = MAX_BUFFER_SIZE - rxBuffer.length;
+          if (chunk.length <= remaining) {
+            rxBuffer.push(...Array.from(chunk));
+          } else {
+            rxBuffer.push(...Array.from(chunk.slice(0, remaining)));
+            this.log(`缓冲区已满 (${MAX_BUFFER_SIZE} 字节)，停止接收`, 'warning');
+            break;
+          }
+          if (rxBuffer.length >= MAX_BUFFER_SIZE) {
+            break;
+          }
         }
       }
       
