@@ -12,7 +12,7 @@ interface SerialPortLike {
 // 计算超时时间，单位：毫秒
 // 根据波形来，因为一个包最大32字节，所以超时时间是 30ms + 10000/baudRate ms
 const timeout_by_baud_rate = (baudRate: number) => {
-  return 30 + (10000 / baudRate);
+  return 30 + (320000 / baudRate);
 }
 
 
