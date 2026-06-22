@@ -15,6 +15,15 @@ import { AsyncPipe } from '@angular/common';
       >
         {{ (vfdService.connected$ | async) ? '关闭串口' : '打开串口' }}
       </button>
+
+      <button 
+        class="btn" 
+        [disabled]="!(vfdService.connected$ |async)"
+        (click)="handleWriteEEPROM()"
+      >
+        {{ '配置写入 EEPROM' }}
+      </button>
+      
       <div 
         class="status" 
         [class.status-connected]="vfdService.connected$ | async"
@@ -112,6 +121,10 @@ export class StatusBarComponent {
         await this.vfdService.connect(selectedBaudRate);
       }
     }
+  }
+  
+  async handleWriteEEPROM(): Promise<void> {
+    await this.vfdService.writeEEPROM();
   }
   
   private showBaudRateDialog(baudRates: number[]): Promise<number | null> {

@@ -196,6 +196,14 @@ export class VfdService {
       }
     }
   }
+
+  public async writeEEPROM()
+  {
+    // 向 0x3 地址写入 39
+    await this.sendCommandAndWaitResponse(this.buildWriteCommand(0x3, [39]));
+    this.log('EEPROM写入完成', 'info');
+
+  }
   
   private async sendCommandAndWaitResponse(data: Uint8Array, idleTimeoutMs?: number): Promise<Uint8Array | null> {
     if (!this.port || !this.port.writable) {
