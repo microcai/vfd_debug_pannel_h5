@@ -16,6 +16,7 @@ export interface LogEntry {
 }
 
 export interface VFDData {
+  status?: number;
   voltage: number;
   current: number;
   reactiveCurrent: number;

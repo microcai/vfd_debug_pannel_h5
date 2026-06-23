@@ -101,6 +101,7 @@ export class VfdService {
   
   private createDefaultData(): VFDData {
     return {
+      status: 0,
       voltage: 0, current: 0, reactiveCurrent: 0, power: 0,
       frequency: 0, torque: 0, speed: 0, position: 0,
       targetFrequency: 0, targetTorque: 0, targetSpeed: 0, targetPosition: 0,
@@ -272,9 +273,10 @@ export class VfdService {
     try {
       this.log('开始读取寄存器...', 'info');
       
-      await this.readRegisterBlock(0x04, 0x10);
-      await this.readRegisterBlock(0x14, 0x10);
-      await this.readRegisterBlock(0x2C, 0x08);
+      await this.readRegisterBlock(0x00, 0x10);
+      await this.readRegisterBlock(0x10, 0x10);
+      await this.readRegisterBlock(0x20, 0x10);
+      await this.readRegisterBlock(0x30, 0x06);
       
       this.updateDataSubject();
       this.log('读取完成', 'info');
@@ -605,6 +607,7 @@ export class VfdService {
   
   private updateDataSubject(): void {
     const data: VFDData = {
+      status: this.registers[0x00]?.value || 0,
       voltage: this.registers[0x04]?.value || 0,
       power: this.registers[0x08]?.value || 0,
       current: this.registers[0x0C]?.value || 0,

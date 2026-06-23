@@ -16,6 +16,7 @@ import { AsyncPipe } from '@angular/common';
         <app-display-card label="当前有功电流" [value]="data.current" unit="A"></app-display-card>
         <app-display-card label="当前无功电流" [value]="data.reactiveCurrent" unit="A"></app-display-card>
         <app-display-card label="功率" [value]="data.power" unit="W"></app-display-card>
+        <div>状态 {{data.status}}  </div>
       </div>
 
       <div class="display-section">
@@ -132,14 +133,16 @@ import { AsyncPipe } from '@angular/common';
 })
 export class RunPanelComponent {
   data: VFDData = {
+    status: 0,
     voltage: 0, current: 0, reactiveCurrent: 0, power: 0,
     frequency: 0, torque: 0, speed: 0, position: 0,
     targetFrequency: 0, targetTorque: 0, targetSpeed: 0, targetPosition: 0,
+
     posKp: 0, posKi: 0, posKd: 0, posOutputLimit: 0,
     speedKp: 0, speedKi: 0, speedKd: 0, speedOutputLimit: 0,
     gearRatio: 0, upperLimit: 0, lowerLimit: 0,
     statorR: 0, rotorR: 0, statorL: 0, rotorL: 0, mutualL: 0,
-    ratedPower: 0, ratedSlip: 0, ratedCurrent: 0, ratedFreq: 0, ratedVoltage: 0, polarCount: 0
+    ratedPower: 0, ratedSlip: 0, ratedCurrent: 0, ratedFreq: 0, ratedVoltage: 0, polarCount: 0,
   };
   
   targetSpeed = 50;

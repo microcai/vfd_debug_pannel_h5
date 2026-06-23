@@ -110,6 +110,7 @@ export class DevicePanelComponent {
   lowerLimit = 0;
   
   private data: VFDData = {
+    status: 0,
     voltage: 0, current: 0, reactiveCurrent: 0, power: 0,
     frequency: 0, torque: 0, speed: 0, position: 0,
     targetFrequency: 0, targetTorque: 0, targetSpeed: 0, targetPosition: 0,
