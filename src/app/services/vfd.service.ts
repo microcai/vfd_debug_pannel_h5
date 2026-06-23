@@ -296,7 +296,7 @@ export class VfdService {
   async writeTargetSpeedAndAngle(speed: number, angle: number): Promise<void> {
     try {
       const data = this.floatToBytes(speed, true).concat(this.floatToBytes(angle, true));
-      const cmd = this.buildWriteCommand(0x24, data);
+      const cmd = this.buildWriteCommand(0x2C, data);
       
       this.log(`写入目标: 速度=${speed}Hz, 角度=${angle}°`, 'info');
       const response = await this.sendCommandAndWaitResponse(cmd);
