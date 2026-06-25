@@ -43,18 +43,18 @@ export class VfdService {
       0x00: { name: 'runStatus', size: 2, type: 'uint16', value: 0 },
       0x02: { name: 'opMode', size: 1, type: 'uint8', value: 0 },
       0x03: { name: 'directControlCommand', size: 1, type: 'uint8', value: 0 },
-      0x04: { name: 'vbus', size: 4, type: 'float32', value: 0 },
-      0x08: { name: 'outputPower', size: 4, type: 'float32', value: 0 },
-      0x0C: { name: 'iq', size: 4, type: 'float32', value: 0 },
-      0x10: { name: 'id', size: 4, type: 'float32', value: 0 },
+      0x04: { name: 'targetFreq', size: 4, type: 'float32', value: 0 },
+      0x08: { name: 'targetTorque', size: 4, type: 'float32', value: 0 },
+      0x0C: { name: 'targetSpeed', size: 4, type: 'float32', value: 0 },
+      0x10: { name: 'targetPosition', size: 4, type: 'float32', value: 0 },
       0x14: { name: 'curFreq', size: 4, type: 'float32', value: 0 },
       0x18: { name: 'curTorque', size: 4, type: 'float32', value: 0 },
       0x1C: { name: 'curSpeed', size: 4, type: 'float32', value: 0 },
       0x20: { name: 'curPosition', size: 4, type: 'float32', value: 0 },
-      0x24: { name: 'targetFreq', size: 4, type: 'float32', value: 0 },
-      0x28: { name: 'targetTorque', size: 4, type: 'float32', value: 0 },
-      0x2C: { name: 'targetSpeed', size: 4, type: 'float32', value: 0 },
-      0x30: { name: 'targetPosition', size: 4, type: 'float32', value: 0 },
+      0x24: { name: 'vbus', size: 4, type: 'float32', value: 0 },
+      0x28: { name: 'outputPower', size: 4, type: 'float32', value: 0 },
+      0x2C: { name: 'iq', size: 4, type: 'float32', value: 0 },
+      0x30: { name: 'id', size: 4, type: 'float32', value: 0 },
       0x40: { name: 'fwMajor', size: 1, type: 'uint8', value: 0 },
       0x41: { name: 'fwMinor', size: 1, type: 'uint8', value: 0 },
       0x42: { name: 'protocolVersion', size: 1, type: 'uint8', value: 0 },
@@ -298,7 +298,7 @@ export class VfdService {
   async writeTargetSpeedAndAngle(speed: number, angle: number): Promise<void> {
     try {
       const data = this.floatToBytes(speed, true).concat(this.floatToBytes(0, true)).concat(this.floatToBytes(speed, true)).concat(this.floatToBytes(angle, true));
-      const cmd = this.buildWriteCommand(0x24, data);
+      const cmd = this.buildWriteCommand(0x04, data);
       
       this.log(`写入目标: 速度=${speed}Hz, 角度=${angle}°`, 'info');
       const response = await this.sendCommandAndWaitResponse(cmd);
@@ -608,18 +608,19 @@ export class VfdService {
   private updateDataSubject(): void {
     const data: VFDData = {
       status: this.registers[0x00]?.value || 0,
-      voltage: this.registers[0x04]?.value || 0,
-      power: this.registers[0x08]?.value || 0,
-      current: this.registers[0x0C]?.value || 0,
-      reactiveCurrent: this.registers[0x10]?.value || 0,
+      targetFrequency: this.registers[0x04]?.value || 0,
+      targetTorque: this.registers[0x08]?.value || 0,
+      targetSpeed: this.registers[0x0C]?.value || 0,
+      targetPosition: this.registers[0x10]?.value || 0,
       frequency: this.registers[0x14]?.value || 0,
       torque: this.registers[0x18]?.value || 0,
       speed: this.registers[0x1C]?.value || 0,
       position: this.registers[0x20]?.value || 0,
-      targetFrequency: this.registers[0x24]?.value || 0,
-      targetTorque: this.registers[0x28]?.value || 0,
-      targetSpeed: this.registers[0x2C]?.value || 0,
-      targetPosition: this.registers[0x30]?.value || 0,
+      voltage: this.registers[0x24]?.value || 0,
+      power: this.registers[0x28]?.value || 0,
+      current: this.registers[0x2C]?.value || 0,
+      reactiveCurrent: this.registers[0x30]?.value || 0,
+
       posKp: this.registers[0x7E]?.value || 0,
       posKi: this.registers[0x80]?.value || 0,
       posKd: this.registers[0x82]?.value || 0,
