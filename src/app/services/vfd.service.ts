@@ -273,11 +273,9 @@ export class VfdService {
     try {
       this.log('开始读取寄存器...', 'info');
       
-      await this.readRegisterBlock(0x00, 0x10);
-      await this.readRegisterBlock(0x10, 0x10);
-      await this.readRegisterBlock(0x20, 0x10);
-      await this.readRegisterBlock(0x30, 0x06);
-      
+      await this.readRegisterBlock(0x00, 0x20);
+      await this.readRegisterBlock(0x20, 0x16);
+
       this.updateDataSubject();
       this.log('读取完成', 'info');
     } catch (error: any) {
@@ -445,8 +443,7 @@ export class VfdService {
   async readMotorRegisters(): Promise<void> {
     try {
       this.log('读取电机参数 (0x60-0x77)...', 'info');
-      await this.readRegisterBlock(0x60, 0x10);
-      await this.readRegisterBlock(0x70, 0x08);
+      await this.readRegisterBlock(0x60, 0x18);
       this.updateDataSubject();
       this.log('电机参数读取完成', 'info');
     } catch (error: any) {
