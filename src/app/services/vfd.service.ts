@@ -214,7 +214,7 @@ export class VfdService {
     const writer = this.port.writable.getWriter();
     const reader = this.port.readable.getReader();
     
-    const MAX_BUFFER_SIZE = 32;
+    const MAX_BUFFER_SIZE = 36;
     const effectiveIdleTimeout = idleTimeoutMs ?? timeout_by_baud_rate(this.baudRate);
     const rxBuffer: number[] = [];
     
