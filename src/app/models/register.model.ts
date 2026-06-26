@@ -17,18 +17,19 @@ export interface LogEntry {
 
 export interface VFDData {
   status?: number;
-  voltage: number;
-  current: number;
-  reactiveCurrent: number;
-  power: number;
-  frequency: number;
-  torque: number;
-  speed: number;
-  position: number;
   targetFrequency: number;
   targetTorque: number;
   targetSpeed: number;
   targetPosition: number;
+  power: number;
+  current: number;
+  reactiveCurrent: number;
+  voltage: number;
+  frequency: number;
+  torque: number;
+  speed: number;
+  position: number;
+  NTCtemp?: number;
   
   posKp: number;
   posKi: number;
