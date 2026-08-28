@@ -17,6 +17,7 @@ export interface LogEntry {
 
 export interface VFDData {
   status?: number;
+  operationMode?: number;
   targetFrequency: number;
   targetTorque: number;
   targetSpeed: number;

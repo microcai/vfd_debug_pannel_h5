@@ -319,6 +319,31 @@ export class VfdService {
     }
   }
   
+  async writeOperationMode(mode: number): Promise<void> {
+    try {
+      const cmd = this.buildWriteCommand(0x02, [mode]);
+      
+      this.log(`切换运行模式: 模式 ${mode}`, 'info');
+      const response = await this.sendCommandAndWaitResponse(cmd);
+      
+      if (response && response.length === 2) {
+        const length = response[0];
+        const crc = response[1];
+        const calculatedCrc = this.crc8(new Uint8Array([length]));
+        if (calculatedCrc === crc) {
+          this.log(`模式切换成功，写入 ${length} 字节`, 'info');
+        } else {
+          this.log('CRC校验失败', 'error');
+        }
+      }
+      
+      this.log('模式切换完成', 'info');
+      await this.readRegisters();
+    } catch (error: any) {
+      this.log(`模式切换失败: ${error.message}`, 'error');
+    }
+  }
+  
   async readPosPidRegisters(): Promise<void> {
     try {
       this.log('读取位置PID参数 (0x7E-0x85)...', 'info');
@@ -606,6 +631,7 @@ export class VfdService {
   private updateDataSubject(): void {
     const data: VFDData = {
       status: this.registers[0x00]?.value || 0,
+      operationMode: this.registers[0x02]?.value || 0,
       targetFrequency: this.registers[0x04]?.value || 0,
       targetTorque: this.registers[0x08]?.value || 0,
       targetSpeed: this.registers[0x0C]?.value || 0,

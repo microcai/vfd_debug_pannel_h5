@@ -41,6 +41,39 @@ import { AsyncPipe } from '@angular/common';
         </div>
       </div>
 
+      @if (vfdService.connected$ | async) {
+        <div class="mode-section">
+          <button
+            class="mode-btn"
+            [class.active]="operationMode === 1 && !switching"
+            [class.switching]="switching && operationMode === 1"
+            [disabled]="switching"
+            (click)="switchMode(1)">
+            <span class="mode-label">模式 1</span>
+            @if (switching && operationMode === 1) {
+              <span class="mode-status">切换中…</span>
+            }
+            @if (operationMode === 1 && !switching) {
+              <span class="mode-status">当前</span>
+            }
+          </button>
+          <button
+            class="mode-btn"
+            [class.active]="operationMode === 7 && !switching"
+            [class.switching]="switching && operationMode === 7"
+            [disabled]="switching"
+            (click)="switchMode(7)">
+            <span class="mode-label">模式 7</span>
+            @if (switching && operationMode === 7) {
+              <span class="mode-status">切换中…</span>
+            }
+            @if (operationMode === 7 && !switching) {
+              <span class="mode-status">当前</span>
+            }
+          </button>
+        </div>
+      }
+
       <div class="display-section">
         <app-display-card label="当前转速" [value]="data.frequency" unit="Hz"></app-display-card>
         <app-display-card label="当前转矩" [value]="data.torque" unit="Nm"></app-display-card>
@@ -99,6 +132,63 @@ import { AsyncPipe } from '@angular/common';
       justify-content: flex-end;
     }
     
+    .mode-section {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .mode-btn {
+      flex: 1;
+      padding: 12px 20px;
+      font-size: 15px;
+      font-weight: bold;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background-color: #f5f5f5;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .mode-btn:hover:not(:disabled) {
+      border-color: #2196F3;
+      color: #1976D2;
+    }
+    
+    .mode-btn.active {
+      background-color: #2196F3;
+      border-color: #1976D2;
+      color: white;
+      box-shadow: 0 2px 8px rgba(33, 150, 243, 0.4);
+    }
+    
+    .mode-btn.switching {
+      border-color: #FF9800;
+      color: #F57C00;
+      animation: modePulse 1s ease-in-out infinite;
+    }
+    
+    .mode-btn:disabled { cursor: not-allowed; }
+    
+    .mode-btn:disabled:not(.switching) {
+      opacity: 0.55;
+    }
+    
+    .mode-status {
+      font-size: 12px;
+      opacity: 0.85;
+    }
+    
+    @keyframes modePulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    
     .btn {
       padding: 10px 20px;
       font-size: 14px;
@@ -147,6 +237,8 @@ export class RunPanelComponent {
   
   targetSpeed = 50;
   targetAngle = 281;
+  operationMode = 1;
+  switching = false;
   
   constructor(
     public vfdService: VfdService,
@@ -154,8 +246,24 @@ export class RunPanelComponent {
   ) {
     vfdService.data$.subscribe(data => {
       this.data = data;
+      if (data.operationMode !== undefined && !this.switching) {
+        this.operationMode = data.operationMode;
+      }
       this.cdr.markForCheck();
     });
+  }
+  
+  async switchMode(mode: number): Promise<void> {
+    if (this.switching || mode === this.operationMode) return;
+    this.switching = true;
+    this.operationMode = mode;
+    this.cdr.markForCheck();
+    try {
+      await this.vfdService.writeOperationMode(mode);
+    } finally {
+      this.switching = false;
+      this.cdr.markForCheck();
+    }
   }
   
   async readData(): Promise<void> {
