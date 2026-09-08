@@ -23,6 +23,10 @@ import { AsyncPipe } from '@angular/common';
           <label for="lowerLimit">下止点角度</label>
           <input type="number" step="0.01" id="lowerLimit" [(ngModel)]="lowerLimit" />
         </div>
+        <div class="input-group">
+          <label for="currentLimit">电流限制</label>
+          <input type="number" step="1" id="currentLimit" [(ngModel)]="currentLimit" placeholder="输入电流限制" />
+        </div>
       </div>
       <div class="button-row">
         <button class="btn btn-read" [disabled]="!(vfdService.connected$ | async)" (click)="readGear()">读取</button>
@@ -108,6 +112,7 @@ export class DevicePanelComponent {
   gearRatio = 0;
   upperLimit = 0;
   lowerLimit = 0;
+  currentLimit = 100;
   
   private data: VFDData = {
     status: 0,
@@ -130,15 +135,22 @@ export class DevicePanelComponent {
       this.gearRatio = data.gearRatio;
       this.upperLimit = data.upperLimit;
       this.lowerLimit = data.lowerLimit;
+      this.currentLimit = data.currentLimit || 0;
       this.cdr.markForCheck();
     });
   }
   
   async readGear(): Promise<void> {
-    await this.vfdService.readGearRegisters();
+    await Promise.all([
+      this.vfdService.readGearRegisters(),
+      this.vfdService.readCurrentLimitRegisters()
+    ]);
   }
   
   async writeGear(): Promise<void> {
-    await this.vfdService.writeGearRegisters(this.gearRatio, this.upperLimit, this.lowerLimit);
+    await Promise.all([
+      this.vfdService.writeGearRegisters(this.gearRatio, this.upperLimit, this.lowerLimit),
+      this.vfdService.writeCurrentLimit(this.currentLimit)
+    ]);
   }
 }

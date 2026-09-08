@@ -45,6 +45,7 @@ export interface VFDData {
   gearRatio: number;
   upperLimit: number;
   lowerLimit: number;
+  currentLimit?: number;
   
   statorR: number;
   rotorR: number;

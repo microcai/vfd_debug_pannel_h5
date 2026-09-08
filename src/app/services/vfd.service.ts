@@ -466,6 +466,43 @@ export class VfdService {
     }
   }
   
+  async readCurrentLimitRegisters(): Promise<void> {
+    try {
+      this.log('读取电流限制 (0x9C-0x9D)...', 'info');
+      const data = await this.sendCommandAndWaitResponse(this.buildReadCommand(0x9C, 0x02));
+      if (data) {
+        const responseData = this.parseReadResponse(data);
+        if (responseData) {
+          this.updateRegistersFromResponse(0x9C, responseData);
+          this.updateDataSubject();
+          this.log('电流限制读取完成', 'info');
+        }
+      }
+    } catch (error: any) {
+      this.log(`读取电流限制失败: ${error.message}`, 'error');
+    }
+  }
+  
+  async writeCurrentLimit(value: number): Promise<void> {
+    try {
+      const data = [value & 0xFF, (value >> 8) & 0xFF];
+      const cmd = this.buildWriteCommand(0x9C, data);
+      this.log(`写入电流限制: ${value}`, 'info');
+      
+      const response = await this.sendCommandAndWaitResponse(cmd);
+      if (response && response.length === 2) {
+        const calculatedCrc = this.crc8(new Uint8Array([response[0]]));
+        if (calculatedCrc === response[1]) {
+          this.log('电流限制写入成功', 'info');
+        } else {
+          this.log('CRC校验失败', 'error');
+        }
+      }
+    } catch (error: any) {
+      this.log(`写入电流限制失败: ${error.message}`, 'error');
+    }
+  }
+  
   async readMotorRegisters(): Promise<void> {
     try {
       this.log('读取电机参数 (0x60-0x77)...', 'info');
@@ -657,6 +694,7 @@ export class VfdService {
       gearRatio: this.registers[0x78]?.value || 0,
       upperLimit: this.registers[0x7A]?.value || 0,
       lowerLimit: this.registers[0x7C]?.value || 0,
+      currentLimit: this.registers[0x9C]?.value || 0,
       statorR: this.registers[0x60]?.value || 0,
       rotorR: this.registers[0x62]?.value || 0,
       statorL: this.registers[0x64]?.value || 0,
